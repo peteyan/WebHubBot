@@ -1,14 +1,13 @@
-#coding:utf-8
-import requests
+# coding:utf-8
+import json
 import logging
-from scrapy.spiders import CrawlSpider
-from scrapy.selector import Selector
+import re
+
 from WebHub.items import PornVideoItem
 from WebHub.pornhub_type import PH_TYPES
 from scrapy.http import Request
-import re
-import json
-import random
+from scrapy.selector import Selector
+from scrapy.spiders import CrawlSpider
 
 
 class Spider(CrawlSpider):
@@ -16,7 +15,7 @@ class Spider(CrawlSpider):
     host = 'https://www.pornhub.com'
     start_urls = list(set(PH_TYPES))
     logging.getLogger("requests").setLevel(logging.WARNING
-                                          )  # 将requests的日志级别设成WARNING
+                                           )  # 将requests的日志级别设成WARNING
     logging.basicConfig(
         level=logging.DEBUG,
         format=
@@ -52,6 +51,7 @@ class Spider(CrawlSpider):
             yield Request(url=self.host + url_next[0],
                           callback=self.parse_ph_key)
             # self.test = False
+
     def parse_ph_info(self, response):
         phItem = PornVideoItem()
         selector = Selector(response)
@@ -59,17 +59,18 @@ class Spider(CrawlSpider):
         _ph_info = re.findall('var flashvars =(.*?),\n', selector.extract())
         logging.debug('PH信息的JSON:')
         logging.debug(_ph_info)
-        _ph_info_json = json.loads(_ph_info[0])
-        duration = _ph_info_json.get('video_duration')
-        phItem['video_duration'] = duration
-        title = _ph_info_json.get('video_title')
-        phItem['video_title'] = title
-        image_url = _ph_info_json.get('image_url')
-        phItem['image_url'] = image_url
-        link_url = _ph_info_json.get('link_url')
-        phItem['link_url'] = link_url
-        quality_480p = _ph_info_json.get('quality_480p')
-        phItem['quality_480p'] = quality_480p
-        logging.info('duration:' + duration + ' title:' + title + ' image_url:'
-                     + image_url + ' link_url:' + link_url)
+        if len(_ph_info) > 0:
+            _ph_info_json = json.loads(_ph_info[0])
+            duration = _ph_info_json.get('video_duration')
+            phItem['video_duration'] = duration
+            title = _ph_info_json.get('video_title')
+            phItem['video_title'] = title
+            image_url = _ph_info_json.get('image_url')
+            phItem['image_url'] = image_url
+            link_url = _ph_info_json.get('link_url')
+            phItem['link_url'] = link_url
+            quality_480p = _ph_info_json.get('quality_480p')
+            phItem['quality_480p'] = quality_480p
+            logging.info('duration:' + duration + ' title:' + title + ' image_url:'
+                         + image_url + ' link_url:' + link_url)
         yield phItem

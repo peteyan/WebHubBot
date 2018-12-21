@@ -1,7 +1,8 @@
 # encoding=utf-8
-import random
-from user_agents import agents
 import json
+import random
+
+from user_agents import agents
 
 
 class UserAgentMiddleware(object):
@@ -31,3 +32,11 @@ class CookiesMiddleware(object):
             bs += chr(random.randint(97, 122))
         _cookie = json.dumps(self.cookie) % bs
         request.cookies = json.loads(_cookie)
+
+
+class ProxyMiddleware(object):
+    def process_request(self, request, spider):
+        if request.url.startswith("http://"):
+            request.meta['proxy'] = "http://127.0.0.1:1081"  # http代理
+        elif request.url.startswith("https://"):
+            request.meta['proxy'] = "http://127.0.0.1:1081"  # https代理
