@@ -56,7 +56,8 @@ class Spider(CrawlSpider):
         phItem = PornVideoItem()
         selector = Selector(response)
         # logging.info(selector)
-        _ph_info = re.findall('var flashvars =(.*?),\n', selector.extract())
+        # _ph_info = re.findall('var flashvars =(.*?),\n', selector.extract())
+        _ph_info = re.findall('var flashvars =(.*?)[,|;]\n', selector.extract())
         logging.debug('PH信息的JSON:')
         logging.debug(_ph_info)
         if len(_ph_info) > 0:
@@ -73,4 +74,5 @@ class Spider(CrawlSpider):
             phItem['quality_480p'] = quality_480p
             logging.info('duration:' + duration + ' title:' + title + ' image_url:'
                          + image_url + ' link_url:' + link_url)
+            phItem['web_url'] = response.url
         yield phItem
